@@ -1,28 +1,21 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn, findRandom } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import config from "./config";
 import { type Cords, useMinesweeper } from "./useMinesweeper";
 
 const size = config.size;
 
-type Board = number[][];
-
-const possibleDegrees = [90, -90, 180] as const;
-
-const randomDegrees = () =>
-  possibleDegrees[Math.floor(Math.random() * possibleDegrees.length)]!;
-
 export default function Board() {
-  const { gameState, board, rotate, onClickCell, rightClick } = useMinesweeper(
-    (state) => ({
+  const { gameState, board, rotate, onClickCell, rightClick, expand } =
+    useMinesweeper((state) => ({
       gameState: state.game,
       board: state.board,
+      expand: state.expand,
       rotate: state.rotate,
       onClickCell: state.click,
       rightClick: state.rightClick,
-    }),
-  );
+    }));
 
   const ref = useRef<HTMLButtonElement>(null);
 
@@ -32,7 +25,7 @@ export default function Board() {
 
     const handleAnimationEnd = (ev: AnimationEvent) => {
       if (ev.animationName === "cell-move" && gameState === "playing") {
-        rotate(randomDegrees());
+        rotate(findRandom([90, -90, 180]));
       }
     };
     element.addEventListener("animationiteration", handleAnimationEnd);
@@ -52,8 +45,13 @@ export default function Board() {
 
   return (
     <div
-      className="grid"
-      style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+      className={cn("grid", {
+        "animate-grid-expand": expand,
+      })}
+      style={{
+        gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+        ["--time" as PropertyKey]: expand ? "2.5s" : "4s",
+      }}
     >
       {board.map((row, y) =>
         row.map((cell, x) => {
@@ -76,6 +74,7 @@ export default function Board() {
                 ["--from-y" as PropertyKey]: `${cell.animation.from.y}px`,
                 ["--to-x" as PropertyKey]: `${cell.animation.to.x}px`,
                 ["--to-y" as PropertyKey]: `${cell.animation.to.y}px`,
+                transform: `translate3d(${cell.animation.from.x}px, ${cell.animation.from.y}px, 0px)`,
               }}
             >
               {cell.open ? cell.value : cell.hasFlag && "🚩"}

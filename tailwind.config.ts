@@ -23,9 +23,18 @@ const config: Config = {
             transform: "translate3d(var(--to-x, 0px), var(--to-y, 0px), 0px)",
           },
         },
+        "grid-expand": {
+          "0%": {
+            gap: "0px",
+          },
+          "100%": {
+            gap: "16px",
+          },
+        },
       },
       animation: {
-        "cell-move": "cell-move 4s forwards infinite",
+        "cell-move": "cell-move var(--time, 4s) forwards infinite",
+        "grid-expand": "grid-expand 0.2s forwards",
       },
     },
   },

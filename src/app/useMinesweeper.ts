@@ -17,9 +17,9 @@ export interface Cords {
 
 function rotateDegAccordingCenter(
   pointToRotate: Cords,
+  center: number,
   degrees: number,
 ): Cords {
-  const center = size * 16;
   const originPoint = {
     x: center,
     y: center,
@@ -93,16 +93,18 @@ class Cell {
     this.hasFlag = !this.hasFlag;
   }
 
-  rotate(degrees: 90 | -90 | 180) {
+  rotate(degrees: number, center: number, gap = 0) {
     const actualPoint = {
-      x: this.initialCol * 32 + this.animation.to.x + 16,
-      y: this.initialRow * 32 + this.animation.to.y + 16,
+      x:
+        this.initialCol * 32 + this.animation.to.x + 16 + gap * this.initialCol,
+      y:
+        this.initialRow * 32 + this.animation.to.y + 16 + gap * this.initialRow,
     };
-    const nextPoint = rotateDegAccordingCenter(actualPoint, degrees);
+    const nextPoint = rotateDegAccordingCenter(actualPoint, center, degrees);
     this.animation.from = { x: this.animation.to.x, y: this.animation.to.y };
     this.animation.to = {
-      x: nextPoint.x - (this.initialCol * 32 + 16),
-      y: nextPoint.y - (this.initialRow * 32 + 16),
+      x: nextPoint.x - (this.initialCol * 32 + 16 + gap * this.initialCol),
+      y: nextPoint.y - (this.initialRow * 32 + 16 + gap * this.initialRow),
     };
   }
 }
@@ -197,7 +199,8 @@ type GAME_STATE = keyof typeof GAME_STATES;
 interface MinesweeperState {
   game: GAME_STATE;
   board: Board;
-  rotate: (degrees: 90 | -90 | 180) => void;
+  expand: boolean;
+  rotate: (degrees: number) => void;
   startGame: (cords: Cords) => void;
   showCell: (cords: Cords, board: Board) => void;
   click: (cords: Cords) => void;
@@ -207,12 +210,14 @@ interface MinesweeperState {
 export const useMinesweeper = create<MinesweeperState>()((set, get) => ({
   game: GAME_STATES.default,
   board: emptyBoard(),
+  expand: false,
   rotate: (degrees) =>
     set((state) => {
       if (state.game !== GAME_STATES.playing) return {};
+      const center = state.expand ? size * 16 + 16 * 7 : size * 16;
       state.board.forEach((row) =>
         row.forEach((cell) => {
-          cell.rotate(degrees);
+          cell.rotate(degrees, center, state.expand ? 16 : 0);
         }),
       );
 
@@ -229,7 +234,7 @@ export const useMinesweeper = create<MinesweeperState>()((set, get) => ({
     }),
   showCell: (cords, board) => {
     const cellSelected = board[cords.y]?.[cords.x];
-    if (!cellSelected) return;
+    if (!cellSelected || cellSelected.open) return;
     cellSelected.show();
     if (cellSelected.value === EMPTY_CELL)
       doAdjacentCell(
@@ -265,7 +270,16 @@ export const useMinesweeper = create<MinesweeperState>()((set, get) => ({
       if (cellSelected.isMine) {
         return { board, game: GAME_STATES.loose };
       }
-      return { board };
+      return {
+        board,
+        expand:
+          state.board.reduce(
+            (prev, curr) =>
+              prev + curr.reduce((p2, curr2) => p2 + Number(curr2.open), 0),
+            0,
+          ) >
+          (size * size - minesAmount) * 0.7,
+      };
     }),
   rightClick: (cords) =>
     set((state) => {
