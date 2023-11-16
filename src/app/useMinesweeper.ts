@@ -50,7 +50,6 @@ class Cell {
   open: boolean;
   hasFlag: boolean;
   animation: {
-    from: Cords;
     to: Cords;
   };
 
@@ -67,10 +66,6 @@ class Cell {
     this.open = false;
     this.hasFlag = false;
     this.animation = {
-      from: {
-        x: 0,
-        y: 0,
-      },
       to: {
         x: 0,
         y: 0,
@@ -95,13 +90,10 @@ class Cell {
 
   rotate(degrees: number, center: number, gap = 0) {
     const actualPoint = {
-      x:
-        this.initialCol * 32 + this.animation.to.x + 16 + gap * this.initialCol,
-      y:
-        this.initialRow * 32 + this.animation.to.y + 16 + gap * this.initialRow,
+      x: this.initialCol * 32 + 16 + gap * this.initialCol,
+      y: this.initialRow * 32 + 16 + gap * this.initialRow,
     };
     const nextPoint = rotateDegAccordingCenter(actualPoint, center, degrees);
-    this.animation.from = { x: this.animation.to.x, y: this.animation.to.y };
     this.animation.to = {
       x: nextPoint.x - (this.initialCol * 32 + 16 + gap * this.initialCol),
       y: nextPoint.y - (this.initialRow * 32 + 16 + gap * this.initialRow),

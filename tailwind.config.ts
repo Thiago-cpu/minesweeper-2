@@ -16,11 +16,16 @@ const config: Config = {
       keyframes: {
         "cell-move": {
           "0%": {
-            transform:
-              "translate3d(var(--from-x, 0px), var(--from-y, 0px), 0px)",
+            transform: "translate3d(0px, 0px, 0px)",
           },
-          "15%, 100%": {
+          "15%": {
             transform: "translate3d(var(--to-x, 0px), var(--to-y, 0px), 0px)",
+          },
+          "50%": {
+            transform: "translate3d(var(--to-x, 0px), var(--to-y, 0px), 0px)",
+          },
+          "65%, 100%": {
+            transform: "translate3d(0px, 0px, 0px)",
           },
         },
         "grid-expand": {
@@ -33,7 +38,7 @@ const config: Config = {
         },
       },
       animation: {
-        "cell-move": "cell-move var(--time, 4s) forwards infinite",
+        "cell-move": "cell-move var(--time, 1s) linear infinite",
         "grid-expand": "grid-expand 0.2s forwards",
       },
     },

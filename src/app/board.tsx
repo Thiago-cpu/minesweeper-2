@@ -50,7 +50,7 @@ export default function Board() {
       })}
       style={{
         gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-        ["--time" as PropertyKey]: expand ? "2.5s" : "4s",
+        ["--time" as PropertyKey]: "4.5s",
       }}
     >
       {board.map((row, y) =>
@@ -70,11 +70,8 @@ export default function Board() {
                 },
               )}
               style={{
-                ["--from-x" as PropertyKey]: `${cell.animation.from.x}px`,
-                ["--from-y" as PropertyKey]: `${cell.animation.from.y}px`,
                 ["--to-x" as PropertyKey]: `${cell.animation.to.x}px`,
                 ["--to-y" as PropertyKey]: `${cell.animation.to.y}px`,
-                transform: `translate3d(${cell.animation.from.x}px, ${cell.animation.from.y}px, 0px)`,
               }}
             >
               {cell.open ? cell.value : cell.hasFlag && "🚩"}
